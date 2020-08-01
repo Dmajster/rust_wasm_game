@@ -1,0 +1,58 @@
+<html>
+
+<head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+</head>
+
+<style>
+  html, body, #canvas {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    height: 100%;
+    width: 100%;
+  }
+
+</style>
+
+<body>
+  <canvas id="canvas" height="1000" width="1000"></canvas>
+
+  <script src='./pkg/game.js'></script>
+
+  <script>
+    const { Game } = wasm_bindgen;
+
+    const fixed_update_rate = 20;
+
+    let game;
+
+    async function browser_init() {
+      await wasm_bindgen('./pkg/game_bg.wasm');
+
+      game = new Game();
+
+      game.start();
+
+      setInterval(() => { browser_fixed_update(); }, 1000 / fixed_update_rate);
+
+      browser_update();
+    }
+
+    function browser_fixed_update() {
+      game.fixed_update();
+    }
+
+    function browser_update() {
+      game.delta_time = 0.16;
+
+      game.update();
+
+      requestAnimationFrame(() => { browser_update(); });
+    }
+
+    browser_init();
+  </script>
+</body>
+
+</html>
