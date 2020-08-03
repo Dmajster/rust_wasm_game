@@ -7,9 +7,11 @@ use components::*;
 mod systems;
 use systems::*;
 
+use components::{
+    IsRenderable, IsResourceDropOff, IsResourceGatherer, IsResourceSource, MoveToEntityTask,
+    ResourceGatherTask,
+};
 use legion::*;
-use tasks::{MoveToEntityTask, ResourceGatherTask, MoveToPositionTask};
-use traits::{IsRenderable, IsResourceDropOff, IsResourceGatherer, IsResourceSource};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::CanvasRenderingContext2d;
@@ -46,10 +48,8 @@ impl Clock {
     }
 }
 
-pub fn print(text: &'static str) {
-    unsafe {
-        console::log_1(&text.into());
-    }
+pub fn print(text: String) {
+    console::log_1(&text.into());
 }
 
 #[wasm_bindgen]
@@ -59,9 +59,11 @@ impl Game {
         panic::set_hook(Box::new(console_error_panic_hook::hook));
 
         let schedule = Schedule::builder()
+            .add_system(resource_gather_task_system())
+            .add_system(resource_find_drop_off_task_system())
+            .add_system(resource_drop_off_task_system())
             .add_system(move_to_entity_task_system())
             .add_system(move_to_position_task_system())
-            .add_system(gather_task_system())
             .add_thread_local(render_system())
             .build();
 
@@ -121,20 +123,15 @@ impl Game {
         let berry_bush = self.world.push((
             berry_bush_sprite,
             Position::new(256.0, 256.0),
-            MoveToPositionTask {
-                position: Position::new(256.0, 0.0),
-            },
             IsResourceSource {
                 resource_type: ResourceType::Food,
-                resource_left: 50,
+                resource_left: 100,
             },
         ));
 
         let villager_1 = self.world.push((
             villager_sprite,
             Position::new(384.0, 384.0),
-            MoveToEntityTask { entity: berry_bush },
-            ResourceGatherTask { target: berry_bush },
             IsResourceGatherer {
                 stroke_gather_amount: 10,
                 stroke_interval: 0.5,
@@ -143,6 +140,8 @@ impl Game {
                 resource_stored: 0,
                 resource_max: 30,
             },
+            MoveToEntityTask { entity: berry_bush },
+            ResourceGatherTask { target: berry_bush },
         ));
     }
 
@@ -150,10 +149,6 @@ impl Game {
         let mut resource_clock = self.resources.get_mut::<Clock>().unwrap();
         resource_clock.time_delta = clock.time_delta;
         resource_clock.last_frame_instant = clock.last_frame_instant;
-
-        // unsafe {
-        //     console::log_1(&format!("dt:{}", clock.time_delta).into());
-        // }
     }
 
     pub fn fixed_update(&mut self) {}

@@ -1,8 +1,5 @@
 use crate::{
-    components::{
-        tasks::{MoveToEntityTask, MoveToPositionTask},
-        Position,
-    },
+    components::{MoveToEntityTask, MoveToPositionTask, Position},
     Clock,
 };
 
@@ -46,7 +43,7 @@ pub fn move_to_position_task(
     command_buffer: &mut CommandBuffer,
 ) {
     if nalgebra_glm::distance(&position, &move_to_position_task.position) < 0.1 {
-        crate::print("reached destination!");
+        crate::print("reached destination!".to_owned());
         command_buffer.remove_component::<MoveToEntityTask>(*entity);
         command_buffer.remove_component::<MoveToPositionTask>(*entity);
         return;

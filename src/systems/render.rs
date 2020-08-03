@@ -1,11 +1,11 @@
-use crate::{components::traits::IsRenderable, Position, Renderer};
-use legion::{system, world::SubWorld, IntoQuery, Read};
+use crate::{components::IsRenderable, Position, Renderer};
+use legion::{system, world::SubWorld, IntoQuery};
 
 #[system]
 #[read_component(Position)]
 #[read_component(IsRenderable)]
 pub fn render(#[resource] renderer: &Renderer, world: &SubWorld) {
-    let mut query = <(Read<Position>, Read<IsRenderable>)>::query();
+    let mut query = <(&Position, &IsRenderable)>::query();
 
     renderer.context.clear_rect(
         0.0,

@@ -1,8 +1,8 @@
 pub mod tasks;
-use tasks::*;
+pub use tasks::*;
 
 pub mod traits;
-use traits::*;
+pub use traits::*;
 
 use nalgebra_glm::Vec2;
 

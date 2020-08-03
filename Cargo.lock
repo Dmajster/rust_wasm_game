@@ -210,7 +210,7 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 [[package]]
 name = "legion"
 version = "0.3.0"
-source = "git+https://github.com/TomGillen/legion?branch=master#1dd69ae6bba978f072e3d4c1072601fb5775a840"
+source = "git+https://github.com/TomGillen/legion?branch=master#fe9203256ed60ca3e616d87b8dd90c44924e801f"
 dependencies = [
  "bit-set",
  "derivative",
@@ -230,7 +230,7 @@ dependencies = [
 [[package]]
 name = "legion_codegen"
 version = "0.3.0"
-source = "git+https://github.com/TomGillen/legion?branch=master#1dd69ae6bba978f072e3d4c1072601fb5775a840"
+source = "git+https://github.com/TomGillen/legion?branch=master#fe9203256ed60ca3e616d87b8dd90c44924e801f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -612,9 +612,9 @@ checksum = "213701ba3370744dcd1a12960caa4843b3d68b4d1c0a5d575e0d65b2ee9d16c0"
 
 [[package]]
 name = "syn"
-version = "1.0.36"
+version = "1.0.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4cdb98bcb1f9d81d07b536179c269ea15999b5d14ea958196413869445bb5250"
+checksum = "239f255b9e3429350f188c27b807fc9920a15eb9145230ff1a7d054c08fec319"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -643,9 +643,9 @@ dependencies = [
 
 [[package]]
 name = "tracing"
-version = "0.1.17"
+version = "0.1.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbdf4ccd1652592b01286a5dbe1e2a77d78afaa34beadd9872a5f7396f92aaa9"
+checksum = "f0aae59226cf195d8e74d4b34beae1859257efb4e5fed3f147d2dc2c7d372178"
 dependencies = [
  "cfg-if",
  "tracing-attributes",
@@ -665,9 +665,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-core"
-version = "0.1.11"
+version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94ae75f0d28ae10786f3b1895c55fe72e79928fd5ccdebb5438c75e93fec178f"
+checksum = "b2734b5a028fa697686f16c6d18c2c6a3c7e41513f9a213abb6754c4acb3c8d7"
 dependencies = [
  "lazy_static",
 ]
