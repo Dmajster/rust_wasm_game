@@ -14,7 +14,7 @@ use legion::component;
 use legion::{system, systems::CommandBuffer, world::SubWorld, Entity, EntityStore, IntoQuery};
 
 #[system(for_each)]
-#[filter(!component::<MoveToPositionTask>() & component::<ResourceGatherTask>())]
+#[filter(!component::<MoveToEntityTask>() & !component::<ResourceFindDropOffTask>() & !component::<ResourceDropOffTask>() & component::<ResourceGatherTask>())]
 #[write_component(IsResourceSource)]
 pub fn resource_gather_task(
     #[resource] clock: &Clock,
@@ -83,8 +83,6 @@ pub fn resource_find_drop_off_task(world: &SubWorld, command_buffer: &mut Comman
     let mut drop_offs_query = <(Entity, &Position, &IsResourceDropOff)>::query();
 
     for (gatherer, gatherer_position, _) in gatherers_query.iter(world) {
-        crate::print("searching for drop off!".to_owned());
-
         let mut closest_entity: Option<&Entity> = None;
         let mut closest_distance = f32::MAX;
 
@@ -121,7 +119,7 @@ pub fn resource_find_drop_off_task(world: &SubWorld, command_buffer: &mut Comman
 }
 
 #[system(for_each)]
-#[filter(!component::<MoveToPositionTask>() & component::<ResourceDropOffTask>())]
+#[filter(!component::<MoveToEntityTask>() & component::<ResourceDropOffTask>())]
 pub fn resource_drop_off_task(
     #[resource] clock: &Clock,
     gather_task: Option<&ResourceGatherTask>,

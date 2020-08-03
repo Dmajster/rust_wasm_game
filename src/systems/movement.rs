@@ -17,20 +17,12 @@ pub fn move_to_entity_task(
     // Ensure target entity didn't get deleted
     if let Some(mut entity_entry) = world.entry_mut(move_to_entity_task.entity) {
         let target_position = entity_entry.get_component::<Position>().unwrap().clone();
-
-        match entity_entry.get_component_mut::<MoveToPositionTask>() {
-            Ok(move_to_position_task) => {
-                move_to_position_task.position = target_position;
-            }
-            Err(_) => {
-                command_buffer.add_component(
-                    *entity,
-                    MoveToPositionTask {
-                        position: target_position,
-                    },
-                );
-            }
-        }
+        command_buffer.add_component(
+            *entity,
+            MoveToPositionTask {
+                position: target_position,
+            },
+        );
     }
 }
 
