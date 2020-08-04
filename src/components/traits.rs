@@ -12,8 +12,8 @@ pub struct IsResourceDropOff {}
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct IsResourceGatherer {
     pub stroke_gather_amount: u32,
-    pub stroke_interval: f32, // TODO This could be stored in a tag to improve performance
-    pub stroke_last_tick: u32,
+    pub stroke_cooldown_duration: f64, // TODO This could be stored in a tag to improve performance
+    pub stroke_last_instant: f64,
 
     pub resource_type: ResourceType,
     pub resource_stored: u32,

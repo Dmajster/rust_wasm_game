@@ -3,7 +3,7 @@ use crate::{
     Clock,
 };
 
-use legion::{system, systems::CommandBuffer, world::SubWorld, Entity, EntityStore, World};
+use legion::{system, systems::CommandBuffer, world::SubWorld, Entity, EntityStore};
 use nalgebra_glm::Vec2;
 
 #[system(for_each)]
@@ -34,7 +34,7 @@ pub fn move_to_position_task(
     entity: &Entity,
     command_buffer: &mut CommandBuffer,
 ) {
-    if nalgebra_glm::distance(&position, &move_to_position_task.position) < 0.1 {
+    if nalgebra_glm::distance(&position, &move_to_position_task.position) < 0.5 {
         crate::print("reached destination!".to_owned());
         command_buffer.remove_component::<MoveToEntityTask>(*entity);
         command_buffer.remove_component::<MoveToPositionTask>(*entity);

@@ -4,7 +4,6 @@ use crate::ResourceDropOffTask;
 use crate::{
     components::IsResourceGatherer,
     components::IsResourceSource,
-    components::MoveToPositionTask,
     components::ResourceFindDropOffTask,
     components::ResourceGatherTask,
     components::{IsResourceDropOff, ResourceType},
@@ -24,6 +23,11 @@ pub fn resource_gather_task(
     world: &mut SubWorld,
     command_buffer: &mut CommandBuffer,
 ) {
+    //Check if the enough time passed for the gatherer to collect the resource again
+    if clock.last_frame_instant - gatherer.stroke_last_instant < gatherer.stroke_cooldown_duration {
+        return;
+    }
+
     let resource_entry = world.entry_mut(gather_task.target);
 
     //If the resource entity was removed remove this task.
@@ -57,6 +61,7 @@ pub fn resource_gather_task(
     resource_source.resource_left -= gathered_resource_amount;
     gatherer.resource_stored += gathered_resource_amount;
     gatherer.resource_type = resource_source.resource_type;
+    gatherer.stroke_last_instant = clock.last_frame_instant;
     crate::print(format!(
         "gatherer: {:#?}\nsource: {:#?}",
         gatherer, resource_source
@@ -68,6 +73,7 @@ pub fn resource_gather_task(
         command_buffer.add_component(*entity, ResourceFindDropOffTask {});
     }
 
+    //Remove resource enity if empty
     if resource_source.resource_left == 0 {
         command_buffer.remove(gather_task.target);
     }
@@ -106,7 +112,6 @@ pub fn resource_find_drop_off_task(world: &SubWorld, command_buffer: &mut Comman
                     entity: *target_entity,
                 },
             );
-
             command_buffer.add_component(
                 *gatherer,
                 ResourceDropOffTask {
@@ -121,11 +126,9 @@ pub fn resource_find_drop_off_task(world: &SubWorld, command_buffer: &mut Comman
 #[system(for_each)]
 #[filter(!component::<MoveToEntityTask>() & component::<ResourceDropOffTask>())]
 pub fn resource_drop_off_task(
-    #[resource] clock: &Clock,
     gather_task: Option<&ResourceGatherTask>,
     gatherer: &mut IsResourceGatherer,
     entity: &Entity,
-    world: &mut SubWorld,
     command_buffer: &mut CommandBuffer,
 ) {
     //TODO increment players resources when that's a thing...

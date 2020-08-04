@@ -1,6 +1,12 @@
 extern crate console_error_panic_hook;
 use std::panic;
 
+use legion::*;
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
+use web_sys::CanvasRenderingContext2d;
+use web_sys::{console, HtmlCanvasElement};
+
 mod components;
 use components::*;
 
@@ -11,16 +17,15 @@ use components::{
     IsRenderable, IsResourceDropOff, IsResourceGatherer, IsResourceSource, MoveToEntityTask,
     ResourceGatherTask,
 };
-use legion::*;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use web_sys::CanvasRenderingContext2d;
-use web_sys::{console, HtmlCanvasElement};
+
+mod map;
+use map::Map;
 
 #[wasm_bindgen]
 pub struct Game {
     world: World,
     resources: Resources,
+    start_schedule: Schedule,
     update_schedule: Schedule,
 }
 
@@ -49,7 +54,9 @@ impl Clock {
 }
 
 pub fn print(text: String) {
-    console::log_1(&text.into());
+    unsafe {
+        console::log_1(&text.into());
+    }
 }
 
 #[wasm_bindgen]
@@ -58,7 +65,9 @@ impl Game {
     pub fn new() -> Self {
         panic::set_hook(Box::new(console_error_panic_hook::hook));
 
-        let schedule = Schedule::builder()
+        let start_schedule = Schedule::builder().add_system(map_create_system()).build();
+
+        let update_schedule = Schedule::builder()
             .add_system(resource_gather_task_system())
             .add_system(resource_find_drop_off_task_system())
             .add_system(resource_drop_off_task_system())
@@ -86,6 +95,7 @@ impl Game {
 
         let mut resources = Resources::default();
         resources.insert(Renderer { canvas, context });
+        resources.insert(Map::new());
         resources.insert(Clock {
             last_frame_instant: 0.0,
             time_delta: 0.001,
@@ -93,12 +103,16 @@ impl Game {
 
         Self {
             world: World::new(),
-            resources: resources,
-            update_schedule: schedule,
+            resources,
+            start_schedule,
+            update_schedule,
         }
     }
 
     pub fn start(&mut self) {
+        self.start_schedule
+            .execute(&mut self.world, &mut self.resources);
+
         let town_center_sprite = IsRenderable {
             color: (255, 0, 0),
             dimensions: (32, 32),
@@ -106,6 +120,11 @@ impl Game {
 
         let berry_bush_sprite = IsRenderable {
             color: (0, 255, 0),
+            dimensions: (8, 8),
+        };
+
+        let stone_pile_sprite = IsRenderable {
+            color: (128, 128, 128),
             dimensions: (8, 8),
         };
 
@@ -129,19 +148,43 @@ impl Game {
             },
         ));
 
+        let stone_pile = self.world.push((
+            stone_pile_sprite,
+            Position::new(128.0, 256.0),
+            IsResourceSource {
+                resource_type: ResourceType::Stone,
+                resource_left: 100,
+            },
+        ));
+
         let villager_1 = self.world.push((
             villager_sprite,
-            Position::new(384.0, 384.0),
+            Position::new(96.0, 80.0),
             IsResourceGatherer {
                 stroke_gather_amount: 10,
-                stroke_interval: 0.5,
-                stroke_last_tick: 0,
+                stroke_cooldown_duration: 1000.0,
+                stroke_last_instant: 0.0,
                 resource_type: ResourceType::None,
                 resource_stored: 0,
                 resource_max: 30,
             },
             MoveToEntityTask { entity: berry_bush },
             ResourceGatherTask { target: berry_bush },
+        ));
+
+        let villager_2 = self.world.push((
+            villager_sprite,
+            Position::new(80.0, 96.0),
+            IsResourceGatherer {
+                stroke_gather_amount: 10,
+                stroke_cooldown_duration: 1500.0,
+                stroke_last_instant: 0.0,
+                resource_type: ResourceType::None,
+                resource_stored: 0,
+                resource_max: 30,
+            },
+            MoveToEntityTask { entity: stone_pile },
+            ResourceGatherTask { target: stone_pile },
         ));
     }
 

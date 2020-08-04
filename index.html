@@ -50,9 +50,12 @@
 
     function browser_update() {
       const current_time = performance.now();
-      clock.time_delta = (current_time - clock.last_frame_instant) / 1000.0;
+      const delta_time = (current_time - clock.last_frame_instant) / 1000.0
+      clock.time_delta = delta_time;
       clock.last_frame_instant = current_time;
       game.set_clock(clock);
+
+      //console.log("update! dt:", delta_time);
       game.update();
       requestAnimationFrame(() => { browser_update(); });
     }
